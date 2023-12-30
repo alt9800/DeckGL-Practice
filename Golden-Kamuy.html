@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="jp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeckGLの地理院地図利用を使ってゴールデンカムイの旅の軌跡を表示する</title>
+    <script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        #credits {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            padding: 2px;
+            font-size: 12px;
+            color: #000000;
+            text-shadow: none;
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+
+        #credits a {
+            color: #000000;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <div id="credits"></div>
+
+    <script>
+
+        let data =
+            [
+                {
+                    "r": 106,
+                    "g": 140,
+                    "b": 199,
+                    "from": {
+                        "name": "小樽",
+                        "coordinates": [
+                            140.994448513724,
+                            43.1908343507675
+                        ]
+                    },
+                    "to": {
+                        "name": "積丹",
+                        "coordinates": [
+                            140.598050469649,
+                            43.2986106028548
+                        ]
+                    }
+                },
+                {
+                    "r": 0,
+                    "g": 159,
+                    "b": 140,
+                    "from": {
+                        "name": "積丹",
+                        "coordinates": [
+                            140.598050469649,
+                            43.287
+                        ]
+                    },
+                    "to": {
+                        "name": "小樽",
+                        "coordinates": [
+                            140.994448513724,
+                            43.183
+                        ]
+                    }
+                },
+                {
+                    "r": 29,
+                    "g": 175,
+                    "b": 158,
+                    "from": {
+                        "name": "小樽",
+                        "coordinates": [
+                            140.994448513724,
+                            43.1908343507675
+                        ]
+                    },
+                    "to": {
+                        "name": "札幌",
+                        "coordinates": [
+                            141.354450548068,
+                            43.0619436817942
+                        ]
+                    }
+                },
+                {
+                    "r": 64,
+                    "g": 191,
+                    "b": 176,
+                    "from": {
+                        "name": "札幌",
+                        "coordinates": [
+                            141.354450548068,
+                            43.0619436817942
+                        ]
+                    },
+                    "to": {
+                        "name": "苫小牧",
+                        "coordinates": [
+                            141.605561659206,
+                            42.6341684468789
+                        ]
+                    }
+                },
+                {
+                    "r": 0,
+                    "g": 146,
+                    "b": 80,
+                    "from": {
+                        "name": "苫小牧",
+                        "coordinates": [
+                            141.605561659206,
+                            42.6341684468789
+                        ]
+                    },
+                    "to": {
+                        "name": "日高",
+                        "coordinates": [
+                            142.074165649596,
+                            42.4802782867337
+                        ]
+                    }
+                },
+                {
+                    "r": 27,
+                    "g": 164,
+                    "b": 102,
+                    "from": {
+                        "name": "日高",
+                        "coordinates": [
+                            142.074165649596,
+                            42.4802782867337
+                        ]
+                    },
+                    "to": {
+                        "name": "夕張",
+                        "coordinates": [
+                            141.973881768296,
+                            43.0566659038886
+                        ]
+                    }
+                },
+                {
+                    "r": 100,
+                    "g": 201,
+                    "b": 155,
+                    "from": {
+                        "name": "夕張",
+                        "coordinates": [
+                            141.973881768296,
+                            43.0566659038886
+                        ]
+                    },
+                    "to": {
+                        "name": "月形",
+                        "coordinates": [
+                            141.669449530775,
+                            43.3383320618887
+                        ]
+                    }
+                },
+                {
+                    "r": 164,
+                    "g": 197,
+                    "b": 32,
+                    "from": {
+                        "name": "月形",
+                        "coordinates": [
+                            141.669449530775,
+                            43.3383320618887
+                        ]
+                    },
+                    "to": {
+                        "name": "神居古潭",
+                        "coordinates": [
+                            142.2025,
+                            43.731833333333334
+                        ]
+                    }
+                },
+                {
+                    "r": 178,
+                    "g": 207,
+                    "b": 62,
+                    "from": {
+                        "name": "神居古潭",
+                        "coordinates": [
+                            142.2025,
+                            43.731833333333334
+                        ]
+                    },
+                    "to": {
+                        "name": "旭川",
+                        "coordinates": [
+                            142.365006103879,
+                            43.7705553013366
+                        ]
+                    }
+                },
+                {
+                    "r": 192,
+                    "g": 216,
+                    "b": 96,
+                    "from": {
+                        "name": "旭川",
+                        "coordinates": [
+                            142.365006103879,
+                            43.7705553013366
+                        ]
+                    },
+                    "to": {
+                        "name": "大雪山",
+                        "coordinates": [
+                            142.853894992499,
+                            43.6635848595412
+                        ]
+                    }
+                },
+                {
+                    "r": 248,
+                    "g": 221,
+                    "b": 141,
+                    "from": {
+                        "name": "大雪山",
+                        "coordinates": [
+                            142.853894992499,
+                            43.6635848595412
+                        ]
+                    },
+                    "to": {
+                        "name": "釧路",
+                        "coordinates": [
+                            144.381668701535,
+                            42.9850002543535
+                        ]
+                    }
+                },
+                {
+                    "r": 235,
+                    "g": 209,
+                    "b": 109,
+                    "from": {
+                        "name": "釧路",
+                        "coordinates": [
+                            144.381668701535,
+                            42.9850002543535
+                        ]
+                    },
+                    "to": {
+                        "name": "屈斜路湖",
+                        "coordinates": [
+                            144.33332824707,
+                            43.6333351135254
+                        ]
+                    }
+                },
+                {
+                    "r": 235,
+                    "g": 199,
+                    "b": 59,
+                    "from": {
+                        "name": "屈斜路湖",
+                        "coordinates": [
+                            144.33332824707,
+                            43.6333351135254
+                        ]
+                    },
+                    "to": {
+                        "name": "阿寒湖",
+                        "coordinates": [
+                            144.100006103516,
+                            43.4500007629395
+                        ]
+                    }
+                },
+                {
+                    "r": 243,
+                    "g": 199,
+                    "b": 89,
+                    "from": {
+                        "name": "阿寒湖",
+                        "coordinates": [
+                            144.100006103516,
+                            43.4500007629395
+                        ]
+                    },
+                    "to": {
+                        "name": "北見",
+                        "coordinates": [
+                            143.894442410208,
+                            43.8027770149056
+                        ]
+                    }
+                },
+                {
+                    "r": 240,
+                    "g": 1186,
+                    "b": 50,
+                    "from": {
+                        "name": "北見",
+                        "coordinates": [
+                            143.894442410208,
+                            43.8027770149056
+                        ]
+                    },
+                    "to": {
+                        "name": "網走",
+                        "coordinates": [
+                            144.273607042269,
+                            44.0205553013366
+                        ]
+                    }
+                },
+                {
+                    "r": 237,
+                    "g": 173,
+                    "b": 11,
+                    "from": {
+                        "name": "網走",
+                        "coordinates": [
+                            144.273607042269,
+                            44.0205553013366
+                        ]
+                    },
+                    "to": {
+                        "name": "大泊",
+                        "coordinates": [
+                            142.78161119279835,
+                            46.63495719465647
+                        ]
+                    }
+                },
+                {
+                    "r": 230,
+                    "g": 133,
+                    "b": 94,
+                    "from": {
+                        "name": "大泊",
+                        "coordinates": [
+                            142.78161119279835,
+                            46.63495719465647
+                        ]
+                    },
+                    "to": {
+                        "name": "豊原",
+                        "coordinates": [
+                            142.73010341442622,
+                            46.958568231427556
+                        ]
+                    }
+                },
+                {
+                    "r": 224,
+                    "g": 106,
+                    "b": 59,
+                    "from": {
+                        "name": "豊原",
+                        "coordinates": [
+                            142.73010341442622,
+                            46.958568231427556
+                        ]
+                    },
+                    "to": {
+                        "name": "亜港",
+                        "coordinates": [
+                            142.15604945428146,
+                            50.89534581509604
+                        ]
+                    }
+                },
+                {
+                    "r": 218,
+                    "g": 80,
+                    "b": 25,
+                    "from": {
+                        "name": "亜港",
+                        "coordinates": [
+                            142.15604945428146,
+                            50.89534581509604
+                        ]
+                    },
+                    "to": {
+                        "name": "敷香",
+                        "coordinates": [
+                            143.10055708300771,
+                            49.22156787487106
+                        ]
+                    }
+                },
+                {
+                    "r": 218,
+                    "g": 98,
+                    "b": 114,
+                    "from": {
+                        "name": "敷香",
+                        "coordinates": [
+                            143.10055708300771,
+                            49.22156787487106
+                        ]
+                    },
+                    "to": {
+                        "name": "大泊",
+                        "coordinates": [
+                            142.78161119279835,
+                            46.63495719465647
+                        ]
+                    }
+                },
+                {
+                    "r": 208,
+                    "g": 66,
+                    "b": 85,
+                    "from": {
+                        "name": "大泊",
+                        "coordinates": [
+                            142.78161119279835,
+                            46.63495719465647
+                        ]
+                    },
+                    "to": {
+                        "name": "雨竜川(士別市周辺)",
+                        "coordinates": [
+                            142.399993896484,
+                            44.1786123829661
+                        ]
+                    }
+                },
+                {
+                    "r": 199,
+                    "g": 36,
+                    "b": 85,
+                    "from": {
+                        "name": "雨竜川(士別市周辺)",
+                        "coordinates": [
+                            142.399993896484,
+                            44.1786123829661
+                        ]
+                    },
+                    "to": {
+                        "name": "空知川(富良野市周辺)",
+                        "coordinates": [
+                            142.383057590458,
+                            43.3419431730872
+                        ]
+                    }
+                },
+                {
+                    "r": 202,
+                    "g": 60,
+                    "b": 110,
+                    "from": {
+                        "name": "空知川(富良野市周辺)",
+                        "coordinates": [
+                            142.383057590458,
+                            43.3419431730872
+                        ]
+                    },
+                    "to": {
+                        "name": "歌志内",
+                        "coordinates": [
+                            142.048340454465,
+                            43.5213886346901
+                        ]
+                    }
+                },
+                {
+                    "r": 191,
+                    "g": 30,
+                    "b": 86,
+                    "from": {
+                        "name": "歌志内",
+                        "coordinates": [
+                            142.048340454465,
+                            43.5213886346901
+                        ]
+                    },
+                    "to": {
+                        "name": "江別",
+                        "coordinates": [
+                            141.536118231947,
+                            43.1036095853196
+                        ]
+                    }
+                },
+                {
+                    "r": 145,
+                    "g": 92,
+                    "b": 139,
+                    "from": {
+                        "name": "江別",
+                        "coordinates": [
+                            141.536118231947,
+                            43.1036095853196
+                        ]
+                    },
+                    "to": {
+                        "name": "札幌",
+                        "coordinates": [
+                            141.354450548068,
+                            43.0619436817942
+                        ]
+                    }
+                },
+                {
+                    "r": 122,
+                    "g": 65,
+                    "b": 113,
+                    "from": {
+                        "name": "札幌",
+                        "coordinates": [
+                            141.354450548068,
+                            43.0619436817942
+                        ]
+                    },
+                    "to": {
+                        "name": "函館",
+                        "coordinates": [
+                            140.728881768417,
+                            41.768610856845
+                        ]
+                    }
+                }
+            ];
+
+        const creditsElement = document.getElementById('credits');
+        creditsElement.innerHTML = `<a href="https://maps.gsi.go.jp/development/ichiran.html#pale2" target="_blank">地理院タイル（淡色地図）</a>`;
+
+        const deckgl = new deck.DeckGL({
+            container: 'map',
+            initialViewState: {
+                longitude: 141.354450548068,
+                latitude: 43.0619436817942,
+                zoom: 7,
+                bearing: 0,
+                pitch: 0,
+                hash: true,
+            },
+            controller: { inertia: true },
+            layers: [
+                // 地理院タイルを読み込む
+                new deck.TileLayer({
+                    data: "https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png",
+                    minZoom: 0,
+                    maxZoom: 18,
+                    tileSize: 256,
+                    renderSubLayers: props => new deck.BitmapLayer(props, {
+                        data: null,
+                        image: props.data,
+                        bounds: (({ west, south, east, north }) => [west, south, east, north])(props.tile.bbox),
+                    }),
+                }),
+                new deck.ArcLayer({
+                    id: 'ArcLayer',
+                    data: data,
+
+                    /* props from ArcLayer class */
+
+                    // getHeight: 1,
+                    getSourceColor: d => [d.r, d.g, d.b],
+                    getSourcePosition: d => d.from.coordinates,
+                    getTargetColor: d => [d.r, d.g, d.b],
+                    getTargetPosition: d => d.to.coordinates,
+                    getWidth: 14,
+                    pickable: true,
+                })
+            ],
+        });
+    </script>
+
+
+</body>
+
+</html>
